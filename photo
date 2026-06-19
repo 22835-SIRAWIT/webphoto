@@ -1,1 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazing Thailand Gallery - ภาพถ่ายสถานที่ท่องเที่ยวเมืองไทย</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
+        /* รีเซ็ตค่าพื้นฐาน */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* ส่วนหัวเว็บไซต์ (Hero Header) */
+        .hero-banner {
+            position: relative;
+            background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com/photo-1528181304800-2f5353a98ef3?q=80&w=1200') no-repeat center center/cover;
+            color: #ffffff;
+            text-align: center;
+            padding: 120px 20px;
+        }
+
+        .hero-banner h1 {
+            font-size: 46px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .hero-banner p {
+            font-size: 18px;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* กล่องเนื้อหาหลัก */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ปุ่มกรองหมวดหมู่ (Filter Buttons) */
+        .filter-wrapper {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 45px;
+        }
+
+        .btn-filter {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 10px 26px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .btn-filter:hover, .btn-filter.active {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* แกลเลอรีการ์ด (Grid Layout) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
+        }
+
+        .gallery-card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* กล่องจัดการรูปภาพ */
+        .card-image-box {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background-color: #cbd5e1;
+            overflow: hidden;
+        }
+
+        .card-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .gallery-card:hover .card-image-box img {
+            transform: scale(1.08);
+        }
+
+        /* ป้ายกำกับประเภท */
+        .badge-category {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #0f172a;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* รายละเอียดของการ์ด */
+        .card-detail {
+            padding: 24px;
+        }
+
+        .card-detail .place-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .card-detail .place-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* ระบบขยายรูปภาพขนาดยักษ์ (Lightbox Modal) */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            max-width: 85%;
+            max-height: 80%;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: #ffffff;
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.1);
+        }
+
+        /* ท้ายหน้าเว็บ */
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 30px 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* ปรับแต่งตามขนาดหน้าจอ (Responsive) */
+        @media (max-width: 768px) {
+            .hero-banner h1 { font-size: 34px; }
+            .hero-banner p { font-size: 15px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .lightbox-close { top: 15px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- แบนเนอร์หัวเว็บไซต์ -->
+    <header class="hero-banner">
+        <h1>เที่ยวเมืองไทย ไม่ไปไม่รู้</h1>
+        <p>รวบรวมภาพถ่ายสถานที่ท่องเที่ยวอันงดงามจากทั่วประเทศไทย สัมผัสธรรมชาติ วัฒนธรรม และความทรงจำที่น่าประทับใจ</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- แถบปุ่มกดกรองหมวดหมู่ -->
+        <div class="filter-wrapper">
+            <button class="btn-filter active" onclick="filterPlaces('all')">สถานที่ทั้งหมด</button>
+            <button class="btn-filter" onclick="filterPlaces('sea')">ทะเล / เกาะ</button>
+            <button class="btn-filter" onclick="filterPlaces('mountain')">ภูเขา / ดอย / ป่าไม้</button>
+            <button class="btn-filter" onclick="filterPlaces('culture')">วัด / วัฒนธรรม / เมืองเก่า</button>
+        </div>
+
+        <!-- โซนภาพแกลเลอรี -->
+        <main class="gallery-grid">
+
+            <!-- การ์ดที่ 1: หมวดหมู่ทะเล (sea) -->
+            <div class="gallery-card" data-category="sea" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">ทะเล / เกาะ</span>
+                    <!-- 📸 ใส่ลิงก์ URL รูปภาพของคุณในช่อง src แทนรูปจำลองด้านล่างนี้ได้เลยครับ -->
+                    <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?q=80&w=600" alt="สิมิลัน">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">หมู่เกาะสิมิลัน, พังงา</h2>
+                    <p class="place-desc">น้ำทะเลใสราวกับกระจก ทรายขาวเนียนละเอียดดั่งแป้ง สวรรค์ของคนรักการดำน้ำชมปะการัง</p>
+                </div>
+            </div>
+
+            <!-- การ์ดที่ 2: หมวดหมู่ภูเขา (mountain) -->
+            <div class="gallery-card" data-category="mountain" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">ภูเขา / ดอย</span>
+                    <!-- 📸 ใส่ลิงก์รูปภาพของคุณที่นี่ -->
+                    <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c3?q=80&w=600" alt="เชียงใหม่">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">ดอยอินทนนท์, เชียงใหม่</h2>
+                    <p class="place-desc">ยอดเขาที่สูงที่สุดในประเทศไทย จุดชมพระอาทิตย์ขึ้นและทะเลหมอกเคล้าลมหนาวที่งดงาม</p>
+                </div>
+            </div>
+
+            <!-- การ์ดที่ 3: หมวดหมู่วัฒนธรรม (culture) -->
+            <div class="gallery-card" data-category="culture" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">วัด / วัฒนธรรม</span>
+                    <!-- 📸 ใส่ลิงก์รูปภาพของคุณที่นี่ -->
+                    <img src="https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=600" alt="วัดพระแก้ว">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">วัดพระศรีรัตนศาสดาราม, กรุงเทพฯ</h2>
+                    <p class="place-desc">วัดพระแก้วมรกรต โบราณสถานศักดิ์สิทธิ์ใจกลางเมืองหลวง โดดเด่นด้วยสถาปัตยกรรมไทยอันวิจิตร</p>
+                </div>
+            </div>
+
+            <!-- การ์ดที่ 4: หมวดหมู่ทะเล (sea) -->
+            <div class="gallery-card" data-category="sea" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">ทะเล / เกาะ</span>
+                    <!-- 📸 ใส่ลิงก์รูปภาพของคุณที่นี่ -->
+                    <img src="https://images.unsplash.com/photo-1537956969549-c49ab7da2a1d?q=80&w=600" alt="กระบี่">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">อ่าวมาหยา เกาะพีพีเล, กระบี่</h2>
+                    <p class="place-desc">อ่าวสวรรค์รูปพระจันทร์เสี้ยวที่โอบล้อมด้วยหน้าผาหินปูน หนึ่งในแลนด์มาร์กระดับโลก</p>
+                </div>
+            </div>
+
+            <!-- การ์ดที่ 5: หมวดหมู่ภูเขา (mountain) -->
+            <div class="gallery-card" data-category="mountain" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">ภูเขา / ดอย</span>
+                    <!-- 📸 ใส่ลิงก์รูปภาพของคุณที่นี่ -->
+                    <img src="https://images.unsplash.com/photo-1624314138470-5a2f24623f10?q=80&w=600" alt="ภูทับเบิก">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">ภูทับเบิก, เพชรบูรณ์</h2>
+                    <p class="place-desc">สัมผัสไอเย็นและทะเลหมอกเหนือแปลงกะหล่ำปลีสีเขียวสุดลูกหูลูกตาบนยอดเขาสูง</p>
+                </div>
+            </div>
+
+            <!-- การ์ดที่ 6: หมวดหมู่วัฒนธรรม (culture) -->
+            <div class="gallery-card" data-category="culture" onclick="openLightbox(this)">
+                <div class="card-image-box">
+                    <span class="badge-category">วัด / วัฒนธรรม</span>
+                    <!-- 📸 ใส่ลิงก์รูปภาพของคุณที่นี่ -->
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWrVQKmj0dEigbTA0qxEsEzY4n_AmDEuRxyLAyT5fVKQ&s=10" alt="อยุธยา">
+                </div>
+                <div class="card-detail">
+                    <h2 class="place-name">อุทยานประวัติศาสตร์พระนครศรีอยุธยา</h2>
+                    <p class="location-desc">ย้อนอดีตชมความยิ่งใหญ่ของราชธานีเก่า มรดกโลกทางวัฒนธรรมอันล้ำค่าและน่าหลงใหล</p>
+                </div>
+            </div>
+
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Thailand Travel Showcase Gallery. รูปภาพทั้งหมดเป็นลิขสิทธิ์ของเจ้าของภาพ</p>
+        </footer>
+    </div>
+
+    <!-- หน้าต่างป็อปอัปขยายรูปภาพ (Lightbox Modal) -->
+    <div id="lightbox" class="lightbox-modal" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" class="lightbox-content" src="" alt="ภาพขยายใหญ่">
+    </div>
+
+    <!-- ระบบทำงาน JavaScript -->
+    <script>
+        // ระบบกรองหมวดหมู่รูปภาพ
+        function filterPlaces(category) {
+            // เคลียร์คลาส active จากปุ่มเก่าแล้วใส่ให้ปุ่มที่กด
+            const buttons = document.querySelectorAll('.btn-filter');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // ซ่อนหรือแสดงการ์ดตามเงื่อนไข
+            const cards = document.querySelectorAll('.gallery-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // ระบบเปิด Lightbox ดูรูปใหญ่
+        function openLightbox(card) {
+            const imgSrc = card.querySelector('img').src;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = imgSrc;
+            lightbox.classList.add('show');
+        }
+
+        // ระบบปิด Lightbox
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
